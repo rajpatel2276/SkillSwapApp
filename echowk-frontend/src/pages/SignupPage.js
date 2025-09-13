@@ -1,121 +1,157 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { signupUser } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { motion } from 'framer-motion';
 
 const SignupPage = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
+  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [error, setError] = useState('');
+  
+  const { signup } = useAuth();
   const navigate = useNavigate();
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
-  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match.');
-      return;
+
+    if (!agreedToTerms) {
+      return setError('You must agree to the Terms of Service and Privacy Policy.');
     }
+    if (password !== confirmPassword) {
+      return setError('Passwords do not match.');
+    }
+    if (password.length < 6) {
+      return setError('Password must be at least 6 characters long.');
+    }
+
     try {
-      const { name, email, password } = formData;
-      const response = await signupUser({ name, email, password });
-      console.log('Signup successful:', response.data);
-      navigate('/login');
+      const userData = { name, username, email };
+      signup(userData); 
+      navigate('/dashboard');
     } catch (err) {
-      console.error('Signup failed:', err);
-      setError('Failed to create account. The email might already be in use.');
+      setError('Failed to create an account. Please try again.');
     }
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.07 } },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  };
+
   return (
-    <div className="relative min-h-screen bg-gray-100 flex flex-col justify-center items-center overflow-hidden py-12 px-4 sm:px-6 lg:px-8">
-      
-      {/* --- BACKGROUND SHAPES --- */}
-      <div className="absolute w-96 h-96 bg-emerald-200 rounded-full -top-20 -left-20 filter blur-3xl opacity-50 animate-pulse"></div>
-      <div className="absolute w-96 h-96 bg-blue-200 rounded-full -bottom-20 -right-10 filter blur-3xl opacity-40 animate-pulse"></div>
-      <div className="absolute w-72 h-72 bg-gray-300 rounded-full -bottom-40 left-20 filter blur-3xl opacity-30 animate-pulse"></div>
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-neutral-50 to-primary/10 flex flex-col">
+      {/* --- Visual Appealers: Animated background blobs --- */}
+      <div className="absolute w-72 h-72 bg-emerald-300 rounded-full -top-10 left-1/4 filter blur-3xl opacity-30 animate-blob mix-blend-multiply animation-delay-2000"></div>
+      <div className="absolute w-96 h-96 bg-teal-200 rounded-full -bottom-20 right-1/3 filter blur-3xl opacity-30 animate-blob animation-delay-4000 mix-blend-multiply"></div>
+      <div className="absolute w-80 h-80 bg-blue-300 rounded-full top-1/2 -left-20 transform -translate-y-1/2 filter blur-3xl opacity-30 animate-blob mix-blend-multiply animation-delay-6000"></div>
+      {/* --- End Visual Appealers --- */}
 
-      {/* --- SIGNUP FORM CONTAINER --- */}
-      <div className="relative z-10 max-w-md w-full mx-auto">
-        <div className="text-center font-bold text-3xl text-gray-800">
-          Create Your Account
-        </div>
-        <div className="bg-white/80 backdrop-blur-sm p-8 mt-6 mb-4 rounded-2xl shadow-lg w-full">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            
-            {/* Full Name Input with Icon */}
-            <div>
-              <label htmlFor="name" className="text-sm font-medium text-gray-700 block mb-2">Full Name</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <input type="text" id="name" value={formData.name} onChange={handleChange} required className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500" placeholder="John Doe" />
-              </div>
+      {/* Simplified Header */}
+      <header className="relative z-10 bg-white/70 backdrop-blur-xl border-b border-neutral-200/50">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <Link to="/" className="text-xl font-bold text-neutral-900">
+              SkillSwap
+            </Link>
+            <Link to="/login" className="text-sm font-semibold text-neutral-800 hover:text-primary transition-colors">
+              Already have an account? <span className="text-primary font-bold">Login</span>
+            </Link>
+          </div>
+        </nav>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative z-10">
+        <motion.div 
+          className="max-w-md w-full"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div variants={itemVariants} className="bg-white/70 backdrop-blur-xl p-8 rounded-2xl shadow-lg border border-neutral-200/50">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-extrabold text-neutral-900">
+                Create your account
+              </h2>
+              <p className="mt-2 text-sm text-neutral-600">
+                Start your skill-sharing journey today.
+              </p>
             </div>
 
-            {/* Email Input with Icon */}
-            <div>
-              <label htmlFor="email" className="text-sm font-medium text-gray-700 block mb-2">Email Address</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" /><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                  </svg>
-                </div>
-                <input type="email" id="email" value={formData.email} onChange={handleChange} required className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500" placeholder="you@example.com" />
-              </div>
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <motion.div variants={itemVariants}>
+                <label htmlFor="name" className="text-sm font-medium text-neutral-700 block mb-2">Full Name</label>
+                <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} required className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-shadow" placeholder="Jane Doe" />
+              </motion.div>
 
-            {/* Password Input with Icon */}
-            <div>
-              <label htmlFor="password" className="text-sm font-medium text-gray-700 block mb-2">Password</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <input type="password" id="password" value={formData.password} onChange={handleChange} required className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500" placeholder="••••••••" />
-              </div>
-            </div>
+              <motion.div variants={itemVariants}>
+                <label htmlFor="username" className="text-sm font-medium text-neutral-700 block mb-2">Username</label>
+                <input type="text" id="username" value={username} onChange={(e) => setUsername(e.target.value)} required className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-shadow" placeholder="janedoe" />
+              </motion.div>
 
-            {/* Confirm Password Input with Icon */}
-            <div>
-              <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700 block mb-2">Confirm Password</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <input type="password" id="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500" placeholder="••••••••" />
-              </div>
-            </div>
+              <motion.div variants={itemVariants}>
+                <label htmlFor="email" className="text-sm font-medium text-neutral-700 block mb-2">Email Address</label>
+                <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-shadow" placeholder="you@example.com" />
+              </motion.div>
+              
+              <motion.div variants={itemVariants}>
+                <label htmlFor="password" className="text-sm font-medium text-neutral-700 block mb-2">Password</label>
+                <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-shadow" placeholder="••••••••" />
+              </motion.div>
 
-            {error && <p className="text-sm text-red-600 text-center">{error}</p>}
-            
-            <button type="submit" className="w-full py-3 px-4 bg-emerald-600 text-white font-semibold rounded-lg shadow-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all">
-              Create Account
-            </button>
-          </form>
-        </div>
-        <div className="text-center text-sm text-gray-600">
-          Already have an account?{' '}
-          <Link to="/login" className="font-medium text-emerald-600 hover:text-emerald-500">
-            Log in
-          </Link>
-        </div>
-      </div>
+              <motion.div variants={itemVariants}>
+                <label htmlFor="confirm-password" className="text-sm font-medium text-neutral-700 block mb-2">Confirm Password</label>
+                <input type="password" id="confirm-password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary transition-shadow" placeholder="••••••••" />
+              </motion.div>
+
+              <motion.div variants={itemVariants} className="flex items-start">
+                <div className="flex items-center h-5">
+                  <input
+                    id="terms"
+                    name="terms"
+                    type="checkbox"
+                    checked={agreedToTerms}
+                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                    className="h-4 w-4 text-primary focus:ring-primary border-neutral-300 rounded"
+                  />
+                </div>
+                <div className="ml-3 text-sm">
+                  <label htmlFor="terms" className="text-neutral-600">
+                    I agree to the{' '}
+                    <Link to="/terms" className="font-medium text-primary hover:underline">Terms of Service</Link>
+                    {' '}and{' '}
+                    <Link to="/privacy" className="font-medium text-primary hover:underline">Privacy Policy</Link>.
+                  </label>
+                </div>
+              </motion.div>
+
+              {error && <p className="text-sm text-red-600 text-center pt-2">{error}</p>}
+              
+              <motion.div variants={itemVariants} className="pt-2">
+                <motion.button 
+                  type="submit" 
+                  disabled={!agreedToTerms}
+                  className="w-full py-3 px-6 rounded-lg text-lg font-semibold text-white bg-gradient-to-r from-primary to-primary-dark shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-primary/50 focus:ring-offset-2 transition-all duration-200 ease-out disabled:opacity-50 disabled:cursor-not-allowed"
+                  whileHover={{ y: agreedToTerms ? -2 : 0 }}
+                  whileTap={{ y: 0, scale: agreedToTerms ? 0.98 : 1, boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)" }}
+                >
+                  Create Account
+                </motion.button>
+              </motion.div>
+            </form>
+          </motion.div>
+        </motion.div>
+      </main>
     </div>
   );
 };
