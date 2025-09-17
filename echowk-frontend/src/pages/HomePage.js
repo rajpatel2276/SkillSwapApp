@@ -1,28 +1,28 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { HiOutlineAcademicCap, HiOutlineUsers, HiOutlineSwitchHorizontal, HiCheckCircle } from 'react-icons/hi';
-import Header from '../components/Header'; // Ensure Header is imported
+import { HiCheckCircle } from 'react-icons/hi';
+import Header from '../components/Header';
+import { useAuth } from '../context/AuthContext'; // Import useAuth to check login status
 
 const HomePage = () => {
-  // Animation settings for sections that fade in on scroll
+  const { user } = useAuth(); // Get the user's status
+
   const sectionAnimation = {
     initial: { opacity: 0, y: 50 },
     whileInView: { opacity: 1, y: 0 },
     transition: { duration: 0.8, ease: "easeInOut" },
-    viewport: { once: true, amount: 0.2 }, // amount: 0.2 means 20% of element must be visible
+    viewport: { once: true, amount: 0.2 },
   };
 
   const featureImage1 = "https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=2670&auto=format&fit=crop";
   const featureImage2 = "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=2670&auto=format&fit=crop";
   const featureImage3 = "https://images.unsplash.com/photo-1507925921958-81fcd9abdc68?q=80&w=2670&auto=format&fit=crop";
 
-
   return (
     <div className="bg-white">
       <Header />
 
-      {/* Hero Section */}
       <main className="relative bg-neutral-900 overflow-hidden">
         <img 
           src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?q=80&w=2574&auto=format&fit=crop" 
@@ -45,12 +45,15 @@ const HomePage = () => {
             Join a vibrant community. Offer what you know, and learn what you don't—all through genuine skill exchange.
           </p>
           <div className="mt-10 flex justify-center items-center gap-x-4">
-            <Link 
-              to="/signup" 
-              className="bg-primary text-white font-semibold px-6 py-3 rounded-lg hover:bg-primary-light shadow-lg transition-all transform hover:scale-105"
-            >
-              Get Started for Free
-            </Link>
+            {/* --- FIX: This button will only show if the user is NOT logged in --- */}
+            {!user && (
+              <Link 
+                to="/signup" 
+                className="bg-primary text-white font-semibold px-6 py-3 rounded-lg hover:bg-primary-light shadow-lg transition-all transform hover:scale-105"
+              >
+                Get Started for Free
+              </Link>
+            )}
             <Link 
               to="/skills" 
               className="bg-white text-primary-dark font-semibold px-6 py-3 rounded-lg border border-neutral-200 hover:bg-neutral-100 shadow-md transition-colors"
@@ -61,7 +64,6 @@ const HomePage = () => {
         </motion.div>
       </main>
 
-      {/* Features Section - Revamped with alternating image/text layout */}
       <section id="features" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -70,67 +72,57 @@ const HomePage = () => {
               Our platform connects you with a world of knowledge through a simple, fair exchange system.
             </p>
           </div>
-          
           <div className="space-y-20 lg:space-y-32">
-            {/* Feature 1: Teach & Earn */}
             <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center" {...sectionAnimation}>
-              <div className="md:order-1"> {/* Order for desktop: text first */}
+              <div className="md:order-1">
                 <span className="inline-block bg-primary-light/10 text-primary-dark px-3 py-1 rounded-full text-sm font-semibold mb-4">Teach & Earn</span>
                 <h3 className="text-3xl font-bold text-neutral-900 mb-4">Share Your Unique Expertise</h3>
                 <p className="text-lg text-neutral-600 mb-6">Easily create a profile and list the skills you're eager to teach. Our intuitive tools help you define your offerings and connect with students globally.</p>
                 <ul className="space-y-3 text-neutral-700">
                   <li className="flex items-center text-md"><HiCheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />Simple, guided listing creation</li>
                   <li className="flex items-center text-md"><HiCheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />Set your own exchange terms and schedule</li>
-                  <li className="flex items-center text-md"><HiCheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />Earn credits for every successful lesson</li>
                 </ul>
               </div>
-              <div className="md:order-2"> {/* Order for desktop: image second */}
+              <div className="md:order-2">
                 <img className="rounded-2xl shadow-xl w-full" src={featureImage1} alt="Person teaching online" />
               </div>
             </motion.div>
-
-            {/* Feature 2: Discover & Grow */}
             <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center" {...sectionAnimation}>
-              <div className="md:order-2"> {/* Order for desktop: image first */}
+              <div className="md:order-2">
                 <span className="inline-block bg-primary-light/10 text-primary-dark px-3 py-1 rounded-full text-sm font-semibold mb-4">Discover & Grow</span>
                 <h3 className="text-3xl font-bold text-neutral-900 mb-4">Learn From Global Mentors</h3>
                 <p className="text-lg text-neutral-600 mb-6">Explore a vast marketplace of skills. From coding to cooking, find experienced tutors and request lessons using the credits you've earned.</p>
                 <ul className="space-y-3 text-neutral-700">
                   <li className="flex items-center text-md"><HiCheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />Powerful search filters to find ideal tutors</li>
                   <li className="flex items-center text-md"><HiCheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />Connect via secure in-platform messaging</li>
-                  <li className="flex items-center text-md"><HiCheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />Track your learning progress and goals</li>
                 </ul>
               </div>
-              <div className="md:order-1"> {/* Order for desktop: text second */}
+              <div className="md:order-1">
                 <img className="rounded-2xl shadow-xl w-full" src={featureImage2} alt="Diverse group of people learning" />
               </div>
             </motion.div>
-
-            {/* Feature 3: Fair Exchange */}
             <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center" {...sectionAnimation}>
-              <div className="md:order-1"> {/* Order for desktop: text first */}
+              <div className="md:order-1">
                 <span className="inline-block bg-primary-light/10 text-primary-dark px-3 py-1 rounded-full text-sm font-semibold mb-4">Fair Exchange</span>
                 <h3 className="text-3xl font-bold text-neutral-900 mb-4">A Seamless Credit Economy</h3>
                 <p className="text-lg text-neutral-600 mb-6">SkillSwap operates on a transparent credit system. Teach a skill, earn credits. Learn a skill, spend credits. It's that simple and equitable.</p>
                 <ul className="space-y-3 text-neutral-700">
                   <li className="flex items-center text-md"><HiCheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />Transparent credit transactions</li>
                   <li className="flex items-center text-md"><HiCheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />No real money needed for skill exchanges</li>
-                  <li className="flex items-center text-md"><HiCheckCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />Easy to manage your credit balance</li>
                 </ul>
               </div>
-              <div className="md:order-2"> {/* Order for desktop: image second */}
+              <div className="md:order-2">
                 <img className="rounded-2xl shadow-xl w-full" src={featureImage3} alt="Abstract digital tokens or currency" />
               </div>
             </motion.div>
-
           </div>
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* --- FIX: Testimonials Section content is now fully restored --- */}
       <motion.section 
         id="testimonials" 
-        className="py-24 bg-neutral-100" // Changed from bg-white for subtle contrast
+        className="py-24 bg-neutral-100"
         {...sectionAnimation}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -173,24 +165,28 @@ const HomePage = () => {
         </div>
       </motion.section>
 
-      {/* Final Call to Action Section */}
-      <motion.section 
-        id="join" 
-        className="bg-primary-dark" // Used a darker primary for better contrast
-        {...sectionAnimation}
-      >
-         <div className="max-w-5xl mx-auto text-center py-20 px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-extrabold text-white sm:text-4xl">Ready to Start Swapping?</h2>
-            <p className="mt-4 text-lg text-primary-light/80">Create your free account today and post your first skill. Your next learning adventure awaits.</p>
-            <div className="mt-8">
+      <motion.section id="join" className="bg-primary-dark" {...sectionAnimation}>
+        <div className="max-w-5xl mx-auto text-center py-20 px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
+            {user ? "Ready to Dive In?" : "Ready to Start Swapping?"}
+          </h2>
+          <p className="mt-4 text-lg text-primary-light/80">
+            {user ? "Go to your dashboard to manage your skills and requests." : "Create your free account today and post your first skill."}
+          </p>
+          <div className="mt-8">
+            {user ? (
+              <Link to="/dashboard" className="bg-white text-primary-dark font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-neutral-100 transform hover:scale-105 transition-all">
+                Go to Dashboard
+              </Link>
+            ) : (
               <Link to="/signup" className="bg-white text-primary-dark font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-neutral-100 transform hover:scale-105 transition-all">
                 Sign Up Now
               </Link>
-            </div>
+            )}
           </div>
+        </div>
       </motion.section>
 
-      {/* Footer */}
       <footer className="bg-neutral-900">
         <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center text-neutral-400">
           <p>&copy; {new Date().getFullYear()} SkillSwap. All rights reserved.</p>

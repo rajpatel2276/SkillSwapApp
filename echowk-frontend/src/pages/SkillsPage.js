@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion'; // Import AnimatePresence
+import { motion, AnimatePresence } from 'framer-motion';
 import { HiCode, HiSpeakerphone, HiMusicNote, HiBeaker, HiChartBar, HiPencilAlt, HiBookOpen, HiOutlineSparkles, HiX, HiSearch } from 'react-icons/hi';
 import Header from '../components/Header';
-import SkillDetailModal from '../components/SkillDetailModal'; // Import the new modal component
+import SkillDetailModal from '../components/SkillDetailModal';
+import { useAuth } from '../context/AuthContext'; // 1. Import useAuth
 
 const SkillsPage = () => {
+  const { user } = useAuth(); // 2. Get the user's status for the main page
   const [allSkills, setAllSkills] = useState([]);
   const [filteredSkills, setFilteredSkills] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
-  const [selectedSkill, setSelectedSkill] = useState(null); // State for the selected skill for modal
+  const [selectedSkill, setSelectedSkill] = useState(null);
   const categories = ['All', 'Technology', 'Creative Arts', 'Lifestyle', 'Business'];
 
   useEffect(() => {
@@ -54,17 +56,13 @@ const SkillsPage = () => {
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.08 },
-    },
+    visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
   };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
   };
-
 
   return (
     <div className="bg-neutral-100 min-h-screen">
@@ -114,7 +112,8 @@ const SkillsPage = () => {
             >
               {filteredSkills.map(skill => (
                 <motion.div variants={itemVariants} key={skill._id}>
-                  <SkillCard skill={skill} onKnowMoreClick={openModal} /> {/* Pass openModal */}
+                  {/* 3. Pass the user status to each card */}
+                  <SkillCard skill={skill} onKnowMoreClick={openModal} user={user} />
                 </motion.div>
               ))}
             </motion.div>
@@ -127,14 +126,12 @@ const SkillsPage = () => {
         </div>
       </main>
 
-      {/* --- Skill Detail Modal --- */}
       <AnimatePresence>
         {selectedSkill && <SkillDetailModal skill={selectedSkill} onClose={closeModal} />}
       </AnimatePresence>
     </div>
   );
 };
-
 
 const getIconForSkill = (skillName) => {
   const lowerCaseName = skillName.toLowerCase();
@@ -147,8 +144,8 @@ const getIconForSkill = (skillName) => {
   return <HiBookOpen className="w-7 h-7" />;
 };
 
-// Modified SkillCard to include "Know More" button and pass handler
-const SkillCard = ({ skill, onKnowMoreClick }) => {
+// 4. Update SkillCard to accept the 'user' prop
+const SkillCard = ({ skill, onKnowMoreClick, user }) => {
   const handleRequestClick = () => {
     alert(`Your request to learn '${skill.name}' has been sent!`);
   };
@@ -172,23 +169,26 @@ const SkillCard = ({ skill, onKnowMoreClick }) => {
           </span>
         </div>
       </div>
-      <div className="bg-neutral-50 p-4 mt-auto flex justify-between gap-3"> {/* Use flex to space buttons */}
+      <div className="bg-neutral-50 p-4 mt-auto flex justify-between gap-3">
         <motion.button
-          onClick={() => onKnowMoreClick(skill)} // New "Know More" button
+          onClick={() => onKnowMoreClick(skill)}
           className="flex-1 py-2 px-4 bg-gradient-to-r from-neutral-300 to-neutral-400 text-neutral-800 font-semibold rounded-lg shadow-md hover:shadow-lg"
           whileHover={{ y: -2 }}
           whileTap={{ scale: 0.98 }}
         >
           Know More
         </motion.button>
-        <motion.button
-          onClick={handleRequestClick}
-          className="flex-1 py-2 px-4 bg-gradient-to-r from-primary to-primary-dark text-white font-semibold rounded-lg shadow-md hover:shadow-lg"
-          whileHover={{ y: -2 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          Request Skill
-        </motion.button>
+        {/* 5. Conditionally render the "Request Skill" button */}
+        {user && (
+          <motion.button
+            onClick={handleRequestClick}
+            className="flex-1 py-2 px-4 bg-gradient-to-r from-primary to-primary-dark text-white font-semibold rounded-lg shadow-md hover:shadow-lg"
+            whileHover={{ y: -2 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            Request Skill
+          </motion.button>
+        )}
       </div>
     </div>
   );
